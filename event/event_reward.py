@@ -36,7 +36,6 @@ def choose_reward(possible_types, characters, espers, items):
     all_types = [flag for flag in RewardType]
     random.shuffle(all_types)
 
-    item_possible = False
     for reward_type in all_types:
         if reward_type & possible_types:
             if reward_type == RewardType.CHARACTER and characters.get_available_count():
@@ -44,11 +43,10 @@ def choose_reward(possible_types, characters, espers, items):
             elif reward_type == RewardType.ESPER and espers.available():
                 return (espers.get_random_esper(), reward_type)
             elif reward_type == RewardType.ITEM:
-                item_possible = True
+                return (items.get_good_random(), RewardType.ITEM)
 
     # tried all possible_rewards and none were available
-    # probably running out of chars and espers and need to make item rewards possible for more events
-    assert(item_possible)
+    # fallback to item if nothing else worked  
     return (items.get_good_random(), RewardType.ITEM)
 
 # Documentation from AtmaTek:
