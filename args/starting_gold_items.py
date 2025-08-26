@@ -20,6 +20,8 @@ def parse(parser):
                                      help = "Start game with %(metavar)s different random tools"),
     starting_gold_items.add_argument("-sj", "--start-junk", default = 0, type = int, choices = range(25), metavar = "COUNT",
                                      help = "Start game with %(metavar)s unique low tier items. Includes weapons, armors, helmets, shields, and relics"),
+    starting_gold_items.add_argument("-sps", "--start-pally", default = 0, type = int, choices = range(2), metavar = "COUNT",
+                                     help = "Start game with %(metavar)s Paladin Shields."),
 
 def process(args):
     pass
@@ -41,6 +43,8 @@ def flags(args):
         flags += f" -sto {args.start_tools}"
     if args.start_junk != 0:
         flags += f" -sj {args.start_junk}"
+    if args.start_pally != 0:
+        flags += f" -sps {args.start_pally}"
 
     return flags
 
@@ -58,7 +62,10 @@ def options(args):
         opts += [
             ("Start Junk", args.start_junk, "start_junk")
         ]
-
+    if args.start_pally != 0:
+        opts += [
+            ("Start Paladin Shields", args.start_pally, "start_pally")
+        ]
     return opts
 
 def menu(args):
