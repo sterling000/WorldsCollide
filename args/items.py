@@ -56,6 +56,9 @@ def parse(parser):
     items.add_argument("-saw", "--stronger-atma-weapon", action="store_true",
                        help="Atma Weapon moved to higher tier and divisor reduced from 64 to 32")
 
+    items.add_argument("-bps", "--breakable-paladin-shield", action="store_true",
+                       help="Paladin Shield can be broken to cast Ultima")
+
 
 def process(args):
     from constants.items import good_items, stronger_items, premium_items
@@ -138,6 +141,10 @@ def process(args):
     args.cursed_shield_battles_original = args.cursed_shield_battles_min == 256 and \
                                           args.cursed_shield_battles_max == 256
 
+    # Make Paladin Shield breakable to cast Ultima
+    if args.breakable_paladin_shield is not None:
+        args.breakable_paladin_shield = True
+
 
 def flags(args):
     flags = ""
@@ -178,6 +185,9 @@ def flags(args):
     if args.stronger_atma_weapon:
         flags += " -saw"
 
+    if args.breakable_paladin_shield:
+        flags += " -bps"
+
     return flags
 
 
@@ -208,6 +218,8 @@ def options(args):
 
     cursed_shield_battles = f"{args.cursed_shield_battles_min}-{args.cursed_shield_battles_max}"
 
+
+
     return [
         ("Equipable", equipable, "items_equipable"),
         ("Equipable Relics", equipable_relics, "relics_equipable"),
@@ -216,6 +228,7 @@ def options(args):
         ("SwdTech Runic All", args.swdtech_runic_all, "swdtech_runic_all"),
         ("Stronger Atma Weapon", args.stronger_atma_weapon, "stronger_atma_weapon"),
         ("Item Rewards", args.item_rewards_ids, "item_rewards"),
+        ("Breakable Paladin Shield", args.breakable_paladin_shield, "breakable_paladin_shield"),
     ]
 
 

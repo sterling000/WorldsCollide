@@ -279,6 +279,10 @@ class Items():
         if self.args.stronger_atma_weapon:
             items_asm.stronger_atma_weapon()
         self.prevent_atma_weapon_rage()
+        
+        # Make Paladin Shield consumable and cast Ultima
+        if self.args.breakable_paladin_shield:
+            items_asm.paladin_shield_consumable()
 
         # overwrite imperial banquet dialogs (1769-1830) with receive item dialogs
         # skip banquet dialogs that are too short (must be >=23 for longest item names)

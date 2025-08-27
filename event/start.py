@@ -199,11 +199,6 @@ class Start(Event):
             src += [
                 field.AddItem("Fenix Down", sound_effect = False),
             ]
-        for ps in range(self.args.start_pally):
-            src += [
-                field.AddItem("Paladin Shld", sound_effect = False),
-            ]
-
         tools = ["NoiseBlaster", "Bio Blaster", "Flash", "Chain Saw",
                  "Debilitator", "Drill", "Air Anchor", "AutoCrossbow"]
         start_tools = random.sample(tools, self.args.start_tools)

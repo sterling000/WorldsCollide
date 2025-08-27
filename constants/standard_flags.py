@@ -248,4 +248,5 @@ standard_flags = {
     "fix_boss_skip": "True",
     "fix_enemy_damage_counter": "True",
     "fix_capture": "True",
+    "breakable_paladin_shield": "False",
 }
