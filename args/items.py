@@ -228,7 +228,7 @@ def options(args):
         ("SwdTech Runic All", args.swdtech_runic_all, "swdtech_runic_all"),
         ("Stronger Atma Weapon", args.stronger_atma_weapon, "stronger_atma_weapon"),
         ("Item Rewards", args.item_rewards_ids, "item_rewards"),
-        ("Breakable Paladin Shield", args.breakable_paladin_shield, "breakable_paladin_shield"),
+        ("Breakable Pal Shld", args.breakable_paladin_shield, "breakable_paladin_shield"),
     ]
 
 
