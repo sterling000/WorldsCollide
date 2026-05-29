@@ -1,4 +1,5 @@
 from enum import Flag, unique, auto
+from typing import Collection
 @unique
 class RewardType(Flag):
     NONE = auto()
@@ -15,7 +16,7 @@ class Reward:
         self.possible_types = possible_types
 
     def single_possible_type(self):
-        return self.possible_types in RewardType
+        return self.possible_types in (RewardType.CHARACTER, RewardType.ESPER, RewardType.ITEM)
 
     def __str__(self):
         result = f"{self.id} {self.type} {self.event.name()}"
