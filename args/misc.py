@@ -16,6 +16,8 @@ def parse(parser):
                       help = "All enemies scannable. All characters start with scan learned. Scan costs 0 MP. Useful for testing/debugging")
     misc.add_argument("-warp", "--warp-all", action = "store_true",
                       help = "All characters start with Warp learned. Warp costs 0 MP. Useful for seeds that limit Warp Stone access")
+    misc.add_argument("-ew", "--enable-warp", action = "store_true",
+                      help = "Enable Warp Stones and Warp spell in Fanatics Tower and Ancient Castle")
     misc.add_argument("-npctips", "--npc-dialog-tips", action = "store_true",
                       help = "NPC provide general game tips")
 
@@ -77,6 +79,8 @@ def flags(args):
         flags += " -scan"
     if args.warp_all:
         flags += " -warp"
+    if args.enable_warp:
+        flags += " -ew"
     if args.npc_dialog_tips:
         flags += " -npctips"
 

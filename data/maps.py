@@ -275,6 +275,55 @@ class Maps():
             asm.BRA("DISABLE SAVE") # replace the vanilla BPL $2EBF to always branch)
         )
 
+    def _enable_warp_in_restricted_areas(self):
+        """
+        Enable warp stones and warp spells in Fanatics Tower and Ancient Castle.
+        Modifies map properties directly using the MapProperty system.
+        """
+        # Map IDs based on event files analysis - enable warp on all Fanatics Tower floors
+        fanatics_tower_maps = [0x16a, 0x16b, 0x16c, 0x16d, 0x16e]  # All floors 362-366
+        ancient_castle_map_id = 0x198  # 408 decimal
+        
+        # Enable warp bit (0x02) in byte 1 of map properties for all Fanatics Tower floors
+        for map_id in fanatics_tower_maps:
+            fanatics_prop = self.properties[map_id]
+            fanatics_prop.data[1] |= 0x02  # Set warp enable bit
+        
+        # Enable warp in Ancient Castle
+        ancient_castle_prop = self.properties[ancient_castle_map_id]  
+        ancient_castle_prop.data[1] |= 0x02  # Set warp enable bit
+        
+        # TODO: Add Fanatics Tower magic-only fix to warp event handler
+        # self._add_fanatics_tower_warp_fix()  # Temporarily disabled - causes black screen
+        
+        print("=== WARP ENABLED IN RESTRICTED AREAS ===")
+        print(f"✓ Fanatics Tower: Warp enabled on {len(fanatics_tower_maps)} floors")
+        print("✓ Ancient Castle: Warp stones and spells enabled") 
+        print("⚠️  Fanatics Tower magic-only restriction NOT yet fixed (causes black screen)")
+        print("✓ Map properties modified to allow warp functionality")
+
+    def _add_fanatics_tower_warp_fix(self):
+        """
+        Add B9 38 command to warp event handler to clear Fanatics Tower magic-only restriction.
+        
+        Based on Discord research:
+        - Fanatics Tower sets bit $1DC9($38) [$1DD0, bit 0] for magic-only mode
+        - Command B9 38 clears this bit
+        - Need to add this to warp event handler at ~0x0A0108 area
+        """
+        # The warp event handler has a sequence of clear event bit commands around 0x0A0128
+        # We need to insert B9 38 after the existing clear commands (D3 CC D3 CD D5 BC)
+        # 
+        # Current sequence: D3 CC D3 CD D5 BC (clear event bits)
+        # We want to add: B9 38 (clear magic-only bit)
+        
+        # Find a good insertion point in the warp handler
+        # Based on Discord conversation, this should go after the other clear commands
+        warp_handler_addr = 0x0A012E  # After the clear event bit sequence
+        
+        space = Reserve(warp_handler_addr, warp_handler_addr + 1, "fanatics tower warp fix")
+        space.write([0xB9, 0x38])  # Clear magic-only restriction bit
+
     def mod(self, characters):
         self.npcs.mod(characters)
         self.chests.mod()
@@ -284,6 +333,10 @@ class Maps():
         self._fix_Cid_timer_glitch()
         if self.args.no_saves:
             self._disable_saves()
+            
+        # Enable warp in restricted areas if flag is set
+        if self.args.enable_warp:
+            self._enable_warp_in_restricted_areas()
 
     def write(self):
         self.npcs.write()

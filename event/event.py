@@ -77,6 +77,8 @@ class Event():
             reward_string += self.characters.get_name(reward.id)
         elif reward.type == RewardType.ESPER:
             reward_string += self.espers.get_name(reward.id)
+            if(reward_string.startswith("Ragnarok")):
+                reward_string += " (Esper)"
         elif reward.type == RewardType.ITEM:
             reward_string += self.items.get_name(reward.id)
         self.rewards_log.append(reward_string + suffix)

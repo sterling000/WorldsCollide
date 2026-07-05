@@ -63,7 +63,7 @@ The pootsleague uses 20 different objectives (A through T), each with specific c
 - **Condition 1:** Type 11 (Check, min_max=False) - Complete Fanatic's Tower Leader (arg: 13)
 
 ### Objective H: `-oh 9.1.1.11.19`
-- **Result:** Complete Checks (ID 9)
+- **Result:** Auto Image
 - **Conditions Required:** 1-1 (must complete exactly 1 condition)
 - **Condition 1:** Type 11 (Check, min_max=False) - Complete Floating Cont. Escape (arg: 19)
 
@@ -97,13 +97,13 @@ The pootsleague uses 20 different objectives (A through T), each with specific c
 - **Conditions Required:** 1-1 (must complete exactly 1 condition)
 - **Condition 1:** Type 11 (Check, min_max=False) - Complete Opera House Disruption (arg: 40)
 
-### Objective O: `-oo 48.10.10.1.1.2.9.9`
-- **Result:** Vigor Random (ID 48) - +10 Vigor to random character (args: 10.10)
+### Objective O: `-oo 48.20.20.1.1.2.9.9`
+- **Result:** Vigor Random (ID 48) - +20 Vigor to random character (args: 20.20)
 - **Conditions Required:** 1-1 (must complete exactly 1 condition)
 - **Condition 1:** Type 2 (Characters, min_max=True) - Recruit 9 Characters (args: 9.9)
 
-### Objective P: `-op 45.10.10.1.1.4.12.12`
-- **Result:** MagPwr All (ID 45) - +10 Mag.Pwr to all characters (args: 10.10)
+### Objective P: `-op 45.20.20.1.1.4.12.12`
+- **Result:** MagPwr All (ID 45) - +20 Mag.Pwr to all characters (args: 20.20)
 - **Conditions Required:** 1-1 (must complete exactly 1 condition)
 - **Condition 1:** Type 4 (Espers, min_max=True) - Find 12 Espers (args: 12.12)
 
