@@ -37,6 +37,9 @@ class OperaHouseWOB(Event):
         self.setzer_npc_id = 0x25
         self.setzer_npc = self.maps.get_npc(0x0e9, self.setzer_npc_id)
 
+        self.overture_maria_npc_id = 0x10 # maria on stage during the overture scene
+        self.overture_maria_npc = self.maps.get_npc(0x0eb, self.overture_maria_npc_id)
+
         self.celes_after_maria_npc_id = 0x26 # the celes sprite used after she is spun around by setzer
         self.celes_after_maria_npc = self.maps.get_npc(0x0e9, self.celes_after_maria_npc_id)
         self.celes_after_maria_npc.sprite = self.characters.CELES
@@ -378,6 +381,9 @@ class OperaHouseWOB(Event):
     def character_mod(self, character):
         self.setzer_npc.sprite = character
         self.setzer_npc.palette = self.characters.get_palette(character)
+
+        self.overture_maria_npc.sprite = character
+        self.overture_maria_npc.palette = self.characters.get_palette(character)
 
         self.reward_mod([
             field.RecruitAndSelectParty(character),
