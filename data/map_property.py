@@ -21,6 +21,7 @@ class MapProperty:
 
     def write(self):
         self.data[28] = self.song
+        # Write entire data array to ensure all modifications (including warp bits) are saved
         self.rom.set_bytes(self.data_start, self.data)
 
     def print(self):

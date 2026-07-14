@@ -50,6 +50,9 @@ class Veldt(Event):
         self.veldt_initialize_mod()
         self.battle_events_mod()
 
+        if self.args.guaranteed_gau_appearance:
+            self.force_front_attacks_mod()
+
         self.log_reward(self.reward)
 
     def leap_mod(self):
@@ -168,6 +171,28 @@ class Veldt(Event):
             asm.JSR(self.load_sprite_function, asm.ABS),
         )
 
+    def force_front_attacks_mod(self):
+        # c2/2e3a chooses the battle arrangement and stores it in $201f,
+        # c2/2e68 then clears the gau/char can return bit if the arrangement is not a front attack
+        # force front attacks for veldt battles so back/pincer/side attacks never block gau/char returning
+        src = [
+            asm.LDX(0x10, asm.IMM8),
+            asm.JSR(0x5247, asm.ABS),   # x = randomly chosen battle arrangement
+            asm.LDA(0x11e4, asm.ABS),   # a = veldt flag bits
+            asm.BIT(0x02, asm.IMM8),    # on veldt?
+            asm.BEQ("RETURN"),
+            asm.LDX(0x00, asm.IMM8),    # force front attack arrangement
+            "RETURN",
+            asm.RTS(),
+        ]
+        space = Write(Bank.C2, src, "veldt force front attack arrangement")
+        force_front = space.start_address
+
+        space = Reserve(0x22e5f, 0x22e63, "call veldt force front attack arrangement", asm.NOP())
+        space.write(
+            asm.JSR(force_front, asm.ABS),
+        )
+
     def check_gau_appear_conditions(self):
         space = Allocate(Bank.C2, 42, "veldt check if gau can return function", asm.NOP())
         return_check_function = space.next_address
@@ -213,11 +238,13 @@ class Veldt(Event):
         space.add_label("QUEUE_BATTLE_EVENT", 0x248c4)
         space.add_label("QUEUE_GAU_EVENT", 0x248ce)
         space.add_label("QUEUE_APPEAR_EVENT", 0x248d1)  # same as QUEUE_GAU_EVENT except skip loading event $1b
+        if not self.args.guaranteed_gau_appearance:
+            space.write(
+                asm.JSR(0x4b5a, asm.ABS),   # a = random number 0-255
+                asm.CMP(0xa0, asm.IMM8),
+                asm.BGE("SKIP_GAU_EVENT"),  # branch if random number >= 0xa0 (about 3/8 chance)
+            )
         space.write(
-            asm.JSR(0x4b5a, asm.ABS),   # a = random number 0-255
-            asm.CMP(0xa0, asm.IMM8),
-            asm.BGE("SKIP_GAU_EVENT"),  # branch if random number >= 0xa0 (about 3/8 chance)
-
             asm.LDA(0x01, asm.IMM8),
             asm.TRB(0x11e4, asm.ABS),   # test and mark gau as not available to return from leap
             asm.BEQ("SKIP_GAU_EVENT"),  # branch if true gau/char can not return from leap

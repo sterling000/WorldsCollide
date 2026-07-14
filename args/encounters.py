@@ -23,6 +23,11 @@ def parse(parser):
                            default = None, type = int, metavar = "PERCENT", choices = range(101),
                            help = "Percent of random encounters escapable including with warp or smoke bombs")
 
+    encounters.add_argument("-gga", "--guaranteed-gau-appearance", action = "store_true",
+                            help = "Only basic front attack battles occur on the Veldt (no bosses, event scripts,"
+                                   " back/pincer/side attacks or formations using the sixth enemy slot)"
+                                   " and Gau always appears after battle when leapt")
+
 def process(args):
     args.random_encounters_original = not args.random_encounters_shuffle and args.random_encounters_random is None
     args.fixed_encounters_original = args.fixed_encounters_random is None
@@ -43,6 +48,9 @@ def flags(args):
 
     if args.encounters_escapable_random is not None:
         flags += f" -escr {args.encounters_escapable_random}"
+
+    if args.guaranteed_gau_appearance:
+        flags += " -gga"
 
     return flags
 
@@ -74,6 +82,7 @@ def options(args):
         escapable = f"{args.encounters_escapable_random}%"
 
     result.append(("Escapable", escapable, "escapable"))
+    result.append(("Guaranteed Gau", args.guaranteed_gau_appearance, "guaranteed_gau_appearance"))
     return result
 
 def menu(args):

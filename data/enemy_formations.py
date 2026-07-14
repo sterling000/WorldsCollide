@@ -134,6 +134,16 @@ class EnemyFormations():
         self.formations[bosses.name_formation["Marshal"]].enemy_ids[1] = random_minion
 
 
+    def restrict_veldt_to_basic(self):
+        # keep only basic battles on the veldt so gau/char appear conditions can always be met:
+        # no bosses/dragons, no event scripts, and no formations using the sixth enemy slot
+        # (gau returns as the sixth enemy so the slot must be empty)
+        excluded = set(self.bosses) | set(self.dragons)
+        for formation in self.formations:
+            if (formation.id in excluded or formation.enable_event_script
+                    or formation.enemy_slots & 0x20):
+                formation.not_on_veldt = 1
+
     def add_chupon(self):
         # Add Chupon (Coliseum) to an unused formation for use with random_encounters_chupon
         self.formations[self.CHUPON].enemy_ids[0] = 64 # Chupon (Coliseum)
@@ -178,6 +188,9 @@ class EnemyFormations():
 
         if self.args.random_encounters_chupon:
             self.add_chupon()
+
+        if self.args.guaranteed_gau_appearance:
+            self.restrict_veldt_to_basic()
 
     def print_scripts(self):
         for formation_index, formation in enumerate(self.formations):

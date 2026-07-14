@@ -16,7 +16,11 @@ class Reward:
         self.possible_types = possible_types
 
     def single_possible_type(self):
-        return self.possible_types in (RewardType.CHARACTER, RewardType.ESPER, RewardType.ITEM)
+        # python version difference -- in 3.9, "self.possible_types in RewardType" will only be true if there's a single reward and self.possible_types would not be a collection
+        # however, in python 3.12+, Collections of objects are also considered that object, so it would always be true even with multiple rewards, so we have to check the length
+        if (isinstance(self.possible_types, Collection)):
+            return len(self.possible_types) == 1
+        return self.possible_types in RewardType
 
     def __str__(self):
         result = f"{self.id} {self.type} {self.event.name()}"
@@ -37,6 +41,7 @@ def choose_reward(possible_types, characters, espers, items):
     all_types = [flag for flag in RewardType]
     random.shuffle(all_types)
 
+    item_possible = False
     for reward_type in all_types:
         if reward_type & possible_types:
             if reward_type == RewardType.CHARACTER and characters.get_available_count():
@@ -44,10 +49,11 @@ def choose_reward(possible_types, characters, espers, items):
             elif reward_type == RewardType.ESPER and espers.available():
                 return (espers.get_random_esper(), reward_type)
             elif reward_type == RewardType.ITEM:
-                return (items.get_good_random(), RewardType.ITEM)
+                item_possible = True
 
     # tried all possible_rewards and none were available
-    # fallback to item if nothing else worked  
+    # probably running out of chars and espers and need to make item rewards possible for more events
+    assert(item_possible)
     return (items.get_good_random(), RewardType.ITEM)
 
 # Documentation from AtmaTek:

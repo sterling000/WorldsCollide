@@ -58,14 +58,10 @@ class Arguments:
         if self.output_file is None:
             # if no output_file given add seed to output name
             name, ext = os.path.splitext(self.input_file)
-            self.output_file = f"{name}_wc_{self.seed}{ext}"
-        elif os.path.isdir(self.output_file):
-            name, ext = os.path.splitext(os.path.basename(self.input_file))
-            # If output_file is a directory, construct the full path with above filename
-            self.output_file = os.path.join(self.output_file, f"{name}_wc_{self.seed}{ext}")            
+            self.output_file = f"preset_pootsleague_{self.seed}{ext}"
 
-        if self.debug:
-            self.spoiler_log = True
+        # if self.debug:
+        self.spoiler_log = True
 
     def _process_min_max(self, arg_name):
         values = getattr(self, arg_name)
