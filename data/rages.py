@@ -77,6 +77,44 @@ class Rages():
             asm.BRA("EMPTY_COMMAND_SLOT"),
         )
 
+    def special_chance(self, percent):
+        from memory.space import Bank, Reserve, Write
+        import instruction.asm as asm
+
+        # Vanilla Rage (C2/05E2-C2/0609) picks the raging character's monster,
+        # then calls C2/4B53 to flip a coin: carry clear -> attack1 (Fight),
+        # carry set -> attack2 (Special). That coin flip is a generic 50/50
+        # helper shared by over a dozen unrelated battle mechanics, so instead
+        # of patching it (and changing all of them), replace just the call at
+        # C2/0600 with our own RNG check that only affects Rage.
+        if percent <= 0:
+            src = [
+                asm.CLC(), # never use Special
+                asm.RTS(),
+            ]
+        elif percent >= 100:
+            src = [
+                asm.SEC(), # always use Special
+                asm.RTS(),
+            ]
+        else:
+            # carry set (Special) when random byte (0-255) >= threshold
+            threshold = round(256 * (100 - percent) / 100) & 0xff
+            src = [
+                asm.PHA(),
+                asm.JSR(0x4b5a, asm.ABS),     # a = random number (0 to 255)
+                asm.CMP(threshold, asm.IMM8),
+                asm.PLA(),
+                asm.RTS(),
+            ]
+        space = Write(Bank.C2, src, "rages special attack chance")
+        special_chance_addr = space.start_address
+
+        space = Reserve(0x20600, 0x20602, "rages call special attack chance")
+        space.write(
+            asm.JSR(special_chance_addr, asm.ABS)
+        )
+
     def no_life(self):
         from data.spell_names import name_id
         # change Robite to cure 2 from life
@@ -95,6 +133,9 @@ class Rages():
 
         if self.args.rages_no_charm:
             self.no_charm()
+
+        if self.args.rage_special_chance is not None:
+            self.special_chance(self.args.rage_special_chance)
 
         if self.args.permadeath:
             self.no_life()
