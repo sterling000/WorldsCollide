@@ -58,7 +58,7 @@ class Arguments:
         if self.output_file is None:
             # if no output_file given add seed to output name
             name, ext = os.path.splitext(self.input_file)
-            self.output_file = f"preset_pootsleague_{self.seed}{ext}"
+            self.output_file = f"preset_wildcard_{self.seed}{ext}"
 
         # if self.debug:
         self.spoiler_log = True

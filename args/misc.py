@@ -159,6 +159,7 @@ def options(args):
         ("Warp All", args.warp_all, "warp_all"),
         ("Event Timers", event_timers, "event_timers"),
         ("Y NPC", y_npc, "y_npc"),
+        ("FC/AC Warp", args.enable_warp, "enable_warp"),
         ("NPC Tips", args.npc_dialog_tips, "npc_dialog_tips"),
     ]
 

@@ -32,6 +32,8 @@ def process(args):
     args.random_encounters_original = not args.random_encounters_shuffle and args.random_encounters_random is None
     args.fixed_encounters_original = args.fixed_encounters_random is None
     args.encounters_escapable_original = args.encounters_escapable_random is None
+    if args.guaranteed_gau_appearance is not None:
+        args.guaranteed_gau_appearance = True
 
 def flags(args):
     flags = ""

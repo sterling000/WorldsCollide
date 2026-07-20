@@ -36,7 +36,7 @@ def run_worlds_collide_loop(num_iterations=10):
         os.chdir(wc_dir)
         
         # Build the command with relative paths from WorldsCollide directory
-        output_path = os.path.join("seeds", f"preset_pootsleague_tunes_{iteration}.smc")
+        output_path = os.path.join("seeds", f"preset_wildcard_tunes_{iteration}.smc")
         cmd = [
             sys.executable, "wc.py",
             "-i", "ffiii.smc",
