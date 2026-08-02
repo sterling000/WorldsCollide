@@ -45,7 +45,7 @@ def options(args):
     if args.start_rages_random:
         start_rages = f"Random {args.start_rages_random_min}-{args.start_rages_random_max}"
 
-    rage_special_chance = "Original (50%)"
+    rage_special_chance = "50"
     if args.rage_special_chance is not None:
         rage_special_chance = f"{args.rage_special_chance}%"
 
@@ -53,7 +53,7 @@ def options(args):
         ("Start Rages", start_rages, "start_rages"),
         ("No Leap", args.rages_no_leap, "rages_no_leap"),
         ("No Charm", args.rages_no_charm, "rages_no_charm"),
-        ("Rage Special Chance", rage_special_chance, "rage_special_chance"),
+        ("Rage Proc %", rage_special_chance, "rage_special_chance"),
     ]
 
 def menu(args):

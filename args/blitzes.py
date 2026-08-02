@@ -8,6 +8,8 @@ def parse(parser):
                          help = "Bum Rush requires learning every other blitz")
     blitzes.add_argument("-bel", "--blitzes-everyone-learns", action = "store_true",
                          help = "Blitzes learnable by characters without the Blitz command")
+    blitzes.add_argument("-brsc", "--bum-rush-skip-cutscene", action = "store_true",
+                         help = "Skip the Duncan's House cutscene when learning Bum Rush, granting it immediately")
 
 def process(args):
     pass
@@ -19,6 +21,8 @@ def flags(args):
         flags += " -brl"
     if args.blitzes_everyone_learns:
         flags += " -bel"
+    if args.bum_rush_skip_cutscene:
+        flags += " -brsc"
 
     return flags
 
@@ -26,6 +30,7 @@ def options(args):
     return [
         ("Bum Rush Last", args.bum_rush_last, "bum_rush_last"),
         ("Everyone Learns", args.blitzes_everyone_learns, "blitzes_everyone_learns"),
+        ("Bum Rush Skip Cutscene", args.bum_rush_skip_cutscene, "bum_rush_skip_cutscene"),
     ]
 
 def menu(args):

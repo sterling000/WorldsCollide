@@ -11,10 +11,14 @@ class DuncanHouseWOR(Event):
             )
 
     def mod(self):
-        self.bum_rush_dialog_mod()
-        self.bum_rush_learn_mod()
-        if self.args.flashes_remove_most or self.args.flashes_remove_worst:
-            self.bum_rush_flash_mod()
+        self.bum_rush_eligibility_mod()
+        if self.args.bum_rush_skip_cutscene:
+            self.bum_rush_skip_cutscene_mod()
+        else:
+            self.bum_rush_dialog_mod()
+            self.bum_rush_choose_leader_mod()
+            if self.args.flashes_remove_most or self.args.flashes_remove_worst:
+                self.bum_rush_flash_mod()
 
     def bum_rush_dialog_mod(self):
         space = Reserve(0xc0c25, 0xc0c27, "duncan house wor duncan!!", field.NOP())
@@ -27,13 +31,14 @@ class DuncanHouseWOR(Event):
         space = Reserve(0xc0ec8, 0xc0eca, "duncan house wor the bum rush", field.NOP())
         space = Reserve(0xc0ede, 0xc0ee0, "duncan house wor give kefka the boot", field.NOP())
 
-    def bum_rush_learn_mod(self):
+    def bum_rush_eligibility_mod(self):
         space = Reserve(0xc0bd8, 0xc0be4, "duncan house bum rush return if sabin not in party", field.NOP())
         space.write(
             field.ReturnIfEventBitClear(event_bit.CAN_LEARN_BUM_RUSH),
             field.ReturnIfEventBitSet(event_bit.LEARNED_BUM_RUSH),
         )
 
+    def bum_rush_choose_leader_mod(self):
         # if sabin in party, learn it with him, otherwise, learn with lowest character id in party
         src = [
             field.ReturnIfCharacterNotInParty(self.characters.SABIN),
@@ -61,3 +66,30 @@ class DuncanHouseWOR(Event):
         flash_addresses = [0xc0d12, 0xc0d5f, 0xc0d7f, 0xc0d9f, 0xc0df0, 0xc0e09, 0xc0e22, 0xc0e3b, 0xc0e65, 0xc0e74]
         for address in flash_addresses:
             space = Reserve(address, address + 1, "duncan house wor bum rush flash", field.FlashScreen(field.Flash.NONE))
+
+    def bum_rush_skip_cutscene_mod(self):
+        # replace the entire walk-in/dialogue/flash cutscene with the single line
+        # that names the move, then grant it directly. The walking/animation is purely
+        # cosmetic, but actually learning the move requires setting its bit in the known
+        # blitzes bitmask ($1d28) -- the event bit alone (what the vanilla script sets)
+        # only tracks whether this scene has played, it doesn't unlock the technique.
+        from objectives.results.learn_blitzes import set_bum_rush_learned
+        from memory.space import START_ADDRESS_SNES
+
+        known_blitzes_address = 0x1d28
+        bum_rush_bit = 0x80
+        src = [
+            asm.LDA(bum_rush_bit, asm.IMM8),
+            asm.TSB(known_blitzes_address, asm.ABS),
+            asm.JSR(set_bum_rush_learned, asm.ABS), # sets LEARNED_BUM_RUSH event bit and updates duncan npc
+            asm.RTL(),
+        ]
+        space = Write(Bank.F0, src, "duncan house wor grant bum rush directly")
+        grant_bum_rush = space.start_address
+
+        space = Reserve(0xc0be5, 0xc0f2d, "duncan house wor skip bum rush cutscene", field.NOP())
+        space.write(
+            field.Dialog(1515), # I call this the "Bum Rush"!!
+            field.LongCall(START_ADDRESS_SNES + grant_bum_rush),
+            field.Return(),
+        )
