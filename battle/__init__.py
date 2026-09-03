@@ -6,6 +6,7 @@ import battle.suplex_train_check
 import battle.auto_status
 import battle.end_checks
 import battle.magitek_upgrade
+import battle.permanent_morph
 from battle.animations import Animations
 
 __all__ = ["Battle"]

@@ -101,6 +101,7 @@ category_types["Item"].append(ResultType(70, "High Tier Armor", "High Tier Armor
 category_types["Item"].append(ResultType(71, "High Tier Shield", "High Tier Shield", None))
 category_types["Item"].append(ResultType(72, "High Tier Helm", "High Tier Helm", None))
 category_types["Item"].append(ResultType(73, "High Tier Relic", "High Tier Relic", None))
+category_types["Command"].append(ResultType(74, "Permanent Morph", "Permanent Morph", None))
 
 categories = list(category_types.keys())
 

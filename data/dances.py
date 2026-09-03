@@ -18,6 +18,41 @@ class Dances:
     ABILITY_NAMES_START = 0x26f881
     ABILITY_NAME_SIZE = 10
 
+    # dance abilities grouped by how they usually behave when used
+    # attacks:     reliably deal damage to enemies
+    # heals:       never damage enemies (heal hp, cure status, or buff the party)
+    # situational: may deal damage, but usually depend on instant death and miss most bosses
+    ATTACK_ABILITIES = [
+        "Wind Slash",
+        "Sand Storm",
+        "Rage",
+        "Wombat",
+        "Land Slide",
+        "Whump",
+        "Elf Fire",
+        "Pois. Frog",
+        "El Nino",
+        "Plasma",
+        "Surge",
+    ]
+    HEAL_ABILITIES = [
+        "Sun Bath",
+        "Kitty",
+        "Harvester",
+        "Tapir",
+        "Wild Bear",
+        "Ice Rabbit",
+    ]
+    SITUATIONAL_ABILITIES = [
+        "Cokatrice",
+        "Antlion",
+        "Sonic Boom",
+        "Specter",
+        "Cave In",
+        "Snare",
+        "Snowball",
+    ]
+
     def __init__(self, rom, args, characters):
         self.rom = rom
         self.args = args
@@ -152,16 +187,30 @@ class Dances:
         self.set_start_dances(dance_bits)
 
     def shuffle(self):
-        abilities = []
-        for dance in self.dances:
-            abilities.extend(dance.dances)
-
         import random
-        random.shuffle(abilities)
+        from constants.dances import ability_id
 
-        for dance_index, dance in enumerate(self.dances):
-            ability_index = dance_index * self.DATA_SIZE
-            dance.dances = abilities[ability_index : ability_index + self.DATA_SIZE]
+        # each dance gets at most one heal and at most one situational ability,
+        # the rest are attacks, so every dance always has at least two attacks
+        attacks = [ability_id[name] for name in self.ATTACK_ABILITIES]
+        heals = [ability_id[name] for name in self.HEAL_ABILITIES]
+        situationals = [ability_id[name] for name in self.SITUATIONAL_ABILITIES]
+
+        for dance in self.dances:
+            abilities = []
+            if random.randint(0, 1):
+                abilities.append(random.choice(heals))
+            if random.randint(0, 1):
+                abilities.append(random.choice(situationals))
+
+            # duplicates are allowed, an ability can appear in multiple slots
+            while len(abilities) < self.DATA_SIZE:
+                abilities.append(random.choice(attacks))
+
+            # slots are not equally likely to be danced, shuffle so the heal/situational
+            # ability is not always in the same slot
+            random.shuffle(abilities)
+            dance.dances = abilities
 
     def mod(self):
         self.write_learners_table()
