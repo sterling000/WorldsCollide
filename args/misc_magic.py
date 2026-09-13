@@ -14,6 +14,9 @@ def parse(parser):
                           nargs = 2, metavar = ("MIN", "MAX"), choices = range(201),
                           help = "Each Magic spell's MP cost set to random percent of original within given range")
 
+    magic.add_argument("-lag2x", "--lagomorph-double-power", action = "store_true",
+                       help = "Slots' Lagomorph heals for double (magic power 20 instead of 10)")
+
 def process(args):
     args._process_min_max("magic_mp_random_value")
     args._process_min_max("magic_mp_random_percent")
@@ -27,6 +30,9 @@ def flags(args):
         flags += f" -mmprv {args.magic_mp_random_value_min} {args.magic_mp_random_value_max}"
     elif args.magic_mp_random_percent:
         flags += f" -mmprp {args.magic_mp_random_percent_min} {args.magic_mp_random_percent_max}"
+
+    if args.lagomorph_double_power:
+        flags += " -lag2x"
 
     return flags
 
@@ -42,6 +48,7 @@ def options(args):
 
     return [
         ("MP", mp, "misc_magic_mp"),
+        ("Lagomorph Double Power", args.lagomorph_double_power, "lagomorph_double_power"),
     ]
 
 def menu(args):

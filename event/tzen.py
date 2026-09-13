@@ -12,10 +12,16 @@ class Tzen(Event):
             field.SetEventBit(npc_bit.ESPER_SELLER_TZEN),
         )
 
+    PRICE_MIN, PRICE_MODE, PRICE_MAX = 5000, 20000, 65000
+
+    def random_price(self):
+        # mostly 20k-40k, with occasional cheaper and big-ticket seeds
+        import random
+        return round(random.triangular(self.PRICE_MIN, self.PRICE_MAX, self.PRICE_MODE))
+
     def mod(self):
-        from random import randint
-        self.wob_price = randint(1, field.RemoveGP.MAX)
-        self.wor_price = randint(1, field.RemoveGP.MAX)
+        self.wob_price = self.random_price()
+        self.wor_price = self.random_price()
 
         if self.reward.type == RewardType.ESPER:
             self.esper_mod(self.reward.id)

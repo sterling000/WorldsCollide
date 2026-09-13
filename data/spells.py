@@ -17,6 +17,14 @@ class Spells:
     ABILITY_DATA_START = 0x046ac0
     ABILITY_DATA_END = 0x046db3
 
+    # Lagomorph (Setzer's Slots) is attack 254, past the spells covered by ABILITY_DATA
+    LAGOMORPH_ID = 254
+    ABILITY_POWER_OFFSET = 6
+    LAGOMORPH_POWER_ADDR = (ABILITY_DATA_START
+                            + LAGOMORPH_ID * AbilityData.DATA_SIZE
+                            + ABILITY_POWER_OFFSET)
+    LAGOMORPH_DOUBLE_POWER = 20 # default: 10
+
     # (default) order spells appear in menu going left to right, top to bottom
     # put white magic before black and effect magic
     import itertools
@@ -96,6 +104,11 @@ class Spells:
             value = int(spell.mp * mp_percent)
             spell.mp = max(min(value, 254), 0)
 
+    def lagomorph_double_power(self):
+        # attack 254 is outside the ability data written back by write(), so patch it directly
+        space = Reserve(self.LAGOMORPH_POWER_ADDR, self.LAGOMORPH_POWER_ADDR, "lagomorph double power")
+        space.write(self.LAGOMORPH_DOUBLE_POWER)
+
     def alternate_healing_text_color(self):
         #Thanks to Osteoclave for identifying this change
         space = Reserve(0x02c693, 0x02c694, "alternate healing color")
@@ -118,6 +131,9 @@ class Spells:
         # Apply Ultima 254 MP after any MP shuffle/rando
         if self.args.ultima_254_mp:
             self.ultima_254_mp()
+
+        if self.args.lagomorph_double_power:
+            self.lagomorph_double_power()
 
         # Graphical changes to spells
         if self.args.alternate_healing_text_color:
