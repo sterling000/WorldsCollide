@@ -68,3 +68,32 @@ def paladin_shield_consumable():
     print("✓ Set spell ID byte +18 = 0x94 (128 + 20 = Ultima)")
     print("")
     print("Paladin Shield will now cast Ultima when consumed!")
+
+def dragon_horn_jumps(min_jumps, max_jumps):
+    # With Dragon Horn equipped (bit 7 of $3c44,x) vanilla rolls a fixed 2-4 attacks at C2/1828:
+    #   JSR $4b5a / INC $3a70 / CMP #$40 / BCS +$0a / INC $3a70 / CMP #$10 / BCS +$03 / INC $3a70
+    # i.e. 75% 2 attacks, 18.75% 3, 6.25% 4. Replace the roll with an even one over the given
+    # range. $3a70 already counts the jump itself, so add (jumps - 1) rather than storing outright.
+    count = max_jumps - min_jumps + 1
+
+    # smallest 2^k - 1 able to hold count - 1, so the reroll below stays even
+    mask = 0
+    while mask < count - 1:
+        mask = (mask << 1) | 1
+
+    # written inline rather than into its own block: bank c2 runs out of room on larger flagsets.
+    # this must stay within the 20 vanilla bytes, C2/1823 branches past them to C2/183c
+    space = Reserve(0x21828, 0x2183b, "dragon horn jump count", asm.NOP())
+    space.write(
+        "REROLL",
+        asm.JSR(0x4b5a, asm.ABS),               # a = random number (0 to 255)
+        asm.AND(mask, asm.IMM8),                # a = 0 to mask
+        asm.CMP(count, asm.IMM8),
+        asm.BCS("REROLL"),                      # reroll until a < count, even 0 to count - 1
+
+        asm.CLC(),
+        asm.ADC(0x3a70, asm.ABS),               # add the jump already counted
+        asm.CLC(),
+        asm.ADC(min_jumps - 1, asm.IMM8),       # a = attacks this jump makes
+        asm.STA(0x3a70, asm.ABS),
+    )

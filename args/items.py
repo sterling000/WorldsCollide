@@ -59,6 +59,10 @@ def parse(parser):
     items.add_argument("-bps", "--breakable-paladin-shield", action="store_true",
                        help="Paladin Shield can be broken to cast Ultima")
 
+    items.add_argument("-dhj", "--dragon-horn-jumps", default=None, type=int,
+                       nargs=2, metavar=("MIN", "MAX"), choices=range(1, 17),
+                       help="Number of attacks a Jump makes with Dragon Horn equipped, rolled evenly in the given range (default: 2-4, weighted toward 2)")
+
 
 def process(args):
     from constants.items import good_items, stronger_items, premium_items
@@ -138,6 +142,7 @@ def process(args):
         args.item_rewards_ids.append(name_id["Empty"])
 
     args._process_min_max("cursed_shield_battles")
+    args._process_min_max("dragon_horn_jumps")
     args.cursed_shield_battles_original = args.cursed_shield_battles_min == 256 and \
                                           args.cursed_shield_battles_max == 256
 
@@ -187,6 +192,8 @@ def flags(args):
 
     if args.breakable_paladin_shield:
         flags += " -bps"
+    if args.dragon_horn_jumps:
+        flags += f" -dhj {args.dragon_horn_jumps_min} {args.dragon_horn_jumps_max}"
 
     return flags
 
@@ -217,6 +224,9 @@ def options(args):
         equipable_relics = f"Shuffle + Random {args.item_equipable_relic_shuffle_random_percent}%"
 
     cursed_shield_battles = f"{args.cursed_shield_battles_min}-{args.cursed_shield_battles_max}"
+    dragon_horn_jumps = "Original"
+    if args.dragon_horn_jumps:
+        dragon_horn_jumps = f"{args.dragon_horn_jumps_min}-{args.dragon_horn_jumps_max}"
 
 
 
@@ -229,6 +239,7 @@ def options(args):
         ("Stronger Atma Weapon", args.stronger_atma_weapon, "stronger_atma_weapon"),
         ("Item Rewards", args.item_rewards_ids, "item_rewards"),
         ("Breakable Pal Shld", args.breakable_paladin_shield, "breakable_paladin_shield"),
+        ("Dragon Horn Jumps", dragon_horn_jumps, "dragon_horn_jumps"),
     ]
 
 

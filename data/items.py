@@ -284,6 +284,10 @@ class Items():
         if self.args.breakable_paladin_shield:
             items_asm.paladin_shield_consumable()
 
+        if self.args.dragon_horn_jumps:
+            items_asm.dragon_horn_jumps(self.args.dragon_horn_jumps_min,
+                                        self.args.dragon_horn_jumps_max)
+
         # overwrite imperial banquet dialogs (1769-1830) with receive item dialogs
         # skip banquet dialogs that are too short (must be >=23 for longest item names)
         self.available_dialogs = list(range(1769, 1777))
