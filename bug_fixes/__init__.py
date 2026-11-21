@@ -5,6 +5,7 @@ from bug_fixes.jump import Jump
 from bug_fixes.retort import Retort
 from bug_fixes.enemy_damage_counter import EnemyDamageCounter
 from bug_fixes.capture import Capture
+from bug_fixes.chainsaw import Chainsaw
 
 __all__ = ["BugFixes"]
 class BugFixes:
@@ -16,3 +17,4 @@ class BugFixes:
         self.retort = Retort()
         self.enemy_damage_counter = EnemyDamageCounter()
         self.capture = Capture()
+        self.chainsaw = Chainsaw()

@@ -49,6 +49,7 @@ standard_flags = {
     "start_level": "3",
     "start_naked": "False",
     "equipable_umaro": "True",
+    "equipable_umaro_espers": "False",
     "character_stats": "80-125%",
     "Morph": "Random Unique",
     "Steal": "Random Unique",
@@ -248,5 +249,6 @@ standard_flags = {
     "fix_boss_skip": "True",
     "fix_enemy_damage_counter": "True",
     "fix_capture": "True",
+    "fix_chainsaw": "False",
     "breakable_paladin_shield": "False",
 }

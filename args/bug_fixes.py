@@ -19,6 +19,8 @@ def parse(parser):
                            help = "Enemy damage counters only trigger if HP is reduced")
     bug_fixes.add_argument("-fc", "--fix-capture", action = "store_true",
                            help = "Fix Capture such that Weapon Special Effects are applied and Multi-Steals work")
+    bug_fixes.add_argument("-fcs", "--fix-chainsaw", action = "store_true",
+                           help = "Chain Saw only attempts instant death against targets that are not immune to it")
 
 def process(args):
     pass
@@ -42,6 +44,8 @@ def flags(args):
         flags += " -fedc"
     if args.fix_capture:
         flags += " -fc"
+    if args.fix_chainsaw:
+        flags += " -fcs"
 
     return flags
 
@@ -55,6 +59,7 @@ def options(args):
         ("Boss Skip", args.fix_boss_skip, "fix_boss_skip"),
         ("Enemy Damage Counter", args.fix_enemy_damage_counter, "fix_enemy_damage_counter"),
         ("Capture", args.fix_capture, "fix_capture"),
+        ("Chain Saw", args.fix_chainsaw, "fix_chainsaw"),
     ]
 
 def menu(args):

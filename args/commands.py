@@ -7,6 +7,8 @@ def parse(parser):
     commands = parser.add_argument_group("Commands")
     commands.add_argument("-com", "--commands", type = str, help = "Character commands")
     commands.add_argument("-scc", "--shuffle-commands", action = "store_true", help = "Shuffle selected/randomized commands")
+    commands.add_argument("-jat", "--jump-airtime", default = None, type = int, choices = range(0, 101), metavar = "PERCENT",
+                          help = "Percent of the normal time a Jump spends in the air before landing (100 = unchanged, 0 = lands immediately)")
     commands.add_argument("-rec1", "--random-exclude-command1", type = int, choices = RANDOM_EXCLUDE_COMMANDS, metavar = "VALUE", default = NONE_COMMAND, help = "Exclude selected command from random possibilities")
     commands.add_argument("-rec2", "--random-exclude-command2", type = int, choices = RANDOM_EXCLUDE_COMMANDS, metavar = "VALUE", default = NONE_COMMAND, help = "Exclude selected command from random possibilities")
     commands.add_argument("-rec3", "--random-exclude-command3", type = int, choices = RANDOM_EXCLUDE_COMMANDS, metavar = "VALUE", default = NONE_COMMAND, help = "Exclude selected command from random possibilities")
@@ -60,6 +62,9 @@ def flags(args):
     if args.shuffle_commands:
         flags += " -scc"
 
+    if args.jump_airtime is not None and args.jump_airtime != 100:
+        flags += f" -jat {args.jump_airtime}"
+
     if args.random_exclude_command1 != NONE_COMMAND:
         flags += f" -rec1 {args.random_exclude_command1}"
     if args.random_exclude_command2 != NONE_COMMAND:
@@ -86,6 +91,11 @@ def options(args):
 
     result.append(("", "", ""))
     result.append(("Shuffle Commands", args.shuffle_commands, "shuffle_commands"))
+
+    airtime = "Original"
+    if args.jump_airtime is not None and args.jump_airtime != 100:
+        airtime = f"{args.jump_airtime}%"
+    result.append(("Jump Air Time", airtime, "jump_airtime"))
 
     add_exclude_command = lambda command, i : result.append(("Random Exclude", "None" if command == NONE_COMMAND else id_name[command], f"random_exclude_command{i}"))
 

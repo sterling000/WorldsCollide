@@ -7,6 +7,66 @@ def equipable_umaro(character_count):
 
     space = Reserve(0x39ef4, 0x39ef7, "Reequip Umaro if genji glove/gauntlet/merit award equipped/removed", asm.NOP())
 
+def equipable_umaro_espers():
+    from data.characters import Characters
+
+    # vanilla skills menu only enables the espers option for characters with the magic command and always
+    # grays it out for gogo, which locks umaro out of espers. keep gogo's behavior and always enable it for umaro
+    # NOTE: umaro still cannot learn spells, battle reward code skips characters >= gogo (C2/5E59)
+    #       esper level up bonuses (C2/60C2) do not check character id so umaro receives them
+    space = Allocate(Bank.C3, 21, "umaro espers skills menu check", asm.NOP())
+    check_espers_option = space.next_address
+    space.write(
+        asm.LDA(0x0000, asm.ABS_Y),             # a = character id
+        asm.CMP(Characters.GOGO, asm.IMM8),
+        asm.BNE("CHECK_UMARO"),
+        asm.LDA(0x24, asm.IMM8),                # gray out espers option
+        asm.STA(0x79, asm.DIR),
+        asm.RTS(),
+
+        "CHECK_UMARO",
+        asm.CMP(Characters.UMARO, asm.IMM8),
+        asm.BNE("RETURN"),
+        asm.LDA(0x20, asm.IMM8),                # enable espers option
+        asm.STA(0x79, asm.DIR),
+
+        "RETURN",
+        asm.RTS(),
+    )
+
+    space = Reserve(0x34d6c, 0x34d77, "skills menu gray out espers option for gogo", asm.NOP())
+    space.write(
+        asm.JMP(check_espers_option, asm.ABS),
+    )
+
+    # battle init zeroes current/max mp for characters without an mp using command (magic/x-magic/lore)
+    # umaro has no commands so he always fought with 0 mp, which prevents mp criticals (illumina, ragnarok, etc.)
+    # exempt umaro so he keeps his mp in battle (a = 8-bit, x = 8-bit, stack: $01 = p, $02 = character index)
+    # NOTE: lives in F0 because C2 free space is exhausted with the full pootsleague flagset
+    #       returns carry set to keep mp, otherwise carry clear and a = character index
+    src = [
+        asm.LSR(0xf8, asm.DIR),                 # carry = character has mp using command
+        asm.BCS("RETURN"),
+        asm.LDA(0x05, asm.S),                   # a = character index (+3 for long return address)
+        asm.TAX(),
+        asm.LDA(0x3ed8, asm.ABS_X),             # a = character id
+        asm.CMP(Characters.UMARO, asm.IMM8),
+        asm.BEQ("RETURN"),                      # equal, carry set
+        asm.TXA(),                              # a = character index (vanilla tax follows)
+        asm.CLC(),
+        "RETURN",
+        asm.RTL(),
+    ]
+    space = Write(Bank.F0, src, "umaro keep mp in battle")
+    check_keep_mp = space.start_address_snes
+
+    space = Reserve(0x253f9, 0x253fe, "battle zero mp if no mp using command", asm.NOP())
+    space.add_label("KEEP_MP", 0x25408)
+    space.write(
+        asm.JSL(check_keep_mp),
+        asm.BCS("KEEP_MP"),
+    )
+
 def set_starting_level(start_level):
     space = Reserve(0x09fc6, 0x09fc6, "Starting level")
     space.write(start_level.to_bytes(1, 'little'))

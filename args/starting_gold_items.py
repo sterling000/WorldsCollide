@@ -16,6 +16,8 @@ def parse(parser):
 
     starting_gold_items.add_argument("-sws", "--start-warp-stones", default = 0, type = int, choices = range(11), metavar = "COUNT",
                                      help = "Start game with %(metavar)s Warp Stones")
+    starting_gold_items.add_argument("-sea", "--start-earrings", default = 0, type = int, choices = range(11), metavar = "COUNT",
+                                     help = "Start game with %(metavar)s Earrings")
     starting_gold_items.add_argument("-sfd", "--start-fenix-downs", default = 0, type = int, choices = range(11), metavar = "COUNT",
                                      help = "Start game with %(metavar)s Fenix Downs")
     starting_gold_items.add_argument("-sto", "--start-tools", default = 0, type = int, choices = range(9), metavar = "COUNT",
@@ -43,6 +45,8 @@ def process(args):
         args.start_items_list.append(StartingItem(230, args.start_sprint_shoes, args.start_sprint_shoes))
     if args.start_warp_stones != 0:
         args.start_items_list.append(StartingItem(253, args.start_warp_stones, args.start_warp_stones))
+    if args.start_earrings != 0:
+        args.start_items_list.append(StartingItem("Earrings", args.start_earrings, args.start_earrings))
     if args.start_fenix_downs != 0:
         args.start_items_list.append(StartingItem(240, args.start_fenix_downs, args.start_fenix_downs))
 
@@ -95,6 +99,8 @@ def flags(args):
         flags += f" -sshoes {args.start_sprint_shoes}"
     if args.start_warp_stones != 0:
         flags += f" -sws {args.start_warp_stones}"
+    if args.start_earrings != 0:
+        flags += f" -sea {args.start_earrings}"
     if args.start_fenix_downs != 0:
         flags += f" -sfd {args.start_fenix_downs}"
     if args.start_tools != 0:

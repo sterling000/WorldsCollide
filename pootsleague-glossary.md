@@ -9,7 +9,7 @@ The pootsleague flagset is a competitive configuration that emphasizes balanced 
 ## Full Command
 
 ```bash
-python3 wc.py -i ffiii.smc -cg -oa 2.2.2.2.6.6.4.9.9 -ob 3.1.1.10.20.20 -oc 30.8.8.1.1.11.8 -od 59.1.1.11.31 -oe 62.1.1.11.44 -of 26.8.8.1.1.11.26 -og 28.10.10.1.1.11.13 -oh 9.1.1.11.19 -oi 31.10.10.1.1.11.3 -oj 8.1.1.11.0 -ok 14.1.1.11.57 -ol 16.1.1.11.59 -om 27.8.8.1.1.11.40 -on 7.1.1.11.40 -oo 48.10.10.1.1.2.9.9 -op 45.10.10.1.1.4.12.12 -oq 29.125.125.1.1.11.10 -or 37.1.1.11.48 -os 38.1.1.12.7 -ot 36.1.1.6.3.3 -sc1 random -sc2 random -sc3 random -sal -eu -csrp 80 125 -fst -brl -slr 4 5 -lmprp 75 125 -lel -srr 25 35 -rnl -rnc -sdr 1 3 -das -dda -dns -sch -scis -com 98989898989898989898989898 -rec1 28 -rec2 97 -xpm 3 -mpm 5 -gpm 5 -nxppd -lsced 2 -hmced 2 -xgced 2 -ase 2 -msl 40 -sed -bbs -drloc shuffle -stloc mix -be -bnu -res -fer 0 -escr 100 -dgne -wnz -mmnu -cmd -esr 2 5 -elr -ebr 82 -emprp 75 125 -emi -nm1 random -rnl1 -rns1 -nm2 random -rnl2 -rns2 -nmmi -mmprp 75 125 -gp 5000 -smc 3 -sws 10 -sfd 10 -sto 3 -ieor 33 -ieror 33 -ir 9,26,27,28,82,96,148,156,162,209,211,228 -csb 5 12 -mca -stra -saw -sisr 30 -sprp 75 125 -sdm 5 -npi -sebr -snsb -ccsr 30 -chrm 0 0 -cms -cspp 2.1.4.4.0.0.0.3.3.4.5.3.3.5.1.0.6.1.0.3 -frw -wmhc -cor 100 -crr 100 -crvr 125 150 -crm -ari -anca -adeh -ame 1 -nmc -noshoes -nu -nfps -fs -fe -fvd -fr -fj -fbs -fedc -fc -ond -etn
+python3 wc.py -i ffiii.smc -cg -oa 2.2.2.2.6.6.4.9.9 -ob 3.1.1.10.20.20 -oc 30.8.8.1.1.11.8 -od 59.1.1.11.31 -oe 62.1.1.11.44 -of 26.8.8.1.1.11.26 -og 28.10.10.1.1.11.13 -oh 9.1.1.11.19 -oi 31.10.10.1.1.11.3 -oj 8.1.1.11.0 -ok 14.1.1.11.57 -ol 16.1.1.11.59 -om 27.8.8.1.1.11.40 -on 7.1.1.11.40 -oo 48.10.10.1.1.2.9.9 -op 45.10.10.1.1.4.12.12 -oq 29.125.125.1.1.11.10 -or 37.1.1.11.48 -os 38.1.1.12.7 -ot 36.1.1.6.3.3 -sc1 random -sc2 random -sc3 random -sal -eu -csrp 80 125 -fst -brl -slr 4 5 -lmprp 75 125 -lel -srr 25 35 -rnl -rnc -sdr 1 3 -das -dda -dns -sch -scis -com 98989898989898989898989898 -rec1 28 -rec2 97 -xpm 3 -mpm 5 -gpm 5 -nxppd -lsced 2 -hmced 2 -xgced 2 -ase 2 -msl 40 -sed -bbs -drloc shuffle -stloc mix -be -bnu -res -fer 0 -escr 100 -dgne -wnz -mmnu -cmd -esr 2 5 -elr -ebr 82 -emprp 75 125 -emi -nm1 random -rnl1 -rns1 -nm2 random -rnl2 -rns2 -nmmi -mmprp 75 125 -gp 5000 -smc 3 -sws 5 -sea 2 -sfd 10 -sto 3 -ieor 33 -ieror 33 -ir 9,26,27,28,82,96,148,156,162,209,211,228 -csb 5 12 -mca -stra -saw -sisr 30 -sprp 75 125 -sdm 5 -npi -sebr -snsb -ccsr 30 -chrm 0 0 -cms -cspp 2.1.4.4.0.0.0.3.3.4.5.3.3.5.1.0.6.1.0.3 -frw -wmhc -cor 100 -crr 100 -crvr 125 150 -crm -ari -anca -adeh -ame 1 -nmc -noshoes -nu -nfps -fs -fe -fvd -fr -fj -fbs -fedc -fc -ond -etn
 ```
 
 ---
@@ -146,6 +146,10 @@ The pootsleague uses 20 different objectives (A through T), each with specific c
 ### `-eu`
 **Full flag:** `--equipable-umaro`
 **Description:** Umaro can access the equipment menu, allowing him to equip different gear instead of being restricted to his default bone club.
+
+### `-eue`
+**Full flag:** `--equipable-umaro-espers`
+**Description:** Umaro can equip espers from the Skills menu, so he gets esper stat bonuses when he levels up. He still can't learn spells. Umaro also keeps his MP in battle (normally anyone without Magic or Lore fights with 0 MP), so with `-eu` and a Ragnarok or Illumina he can equip, his normal Fight swings can spend MP to land critical hits. His Charge attack never uses weapon effects, so it can't MP-crit.
 
 ### `-csrp 80 125`
 **Full flag:** `--character-stat-random-percent 80 125`
@@ -347,13 +351,13 @@ The pootsleague uses 20 different objectives (A through T), each with specific c
 
 ## Items
 
-### `-ieor 33`
-**Full flag:** `--item-equipable-original-random 33`
-**Description:** Characters have a 33% chance of being able to equip each item they previously could not equip.
+### `-ieor 40`
+**Full flag:** `--item-equipable-original-random 40`
+**Description:** Characters have a 40% chance of being able to equip each item they previously could not equip.
 
-### `-ieror 33`
-**Full flag:** `--item-equipable-relic-original-random 33`
-**Description:** Characters have a 33% chance of being able to equip each relic they previously could not equip.
+### `-ieror 40`
+**Full flag:** `--item-equipable-relic-original-random 40`
+**Description:** Characters have a 40% chance of being able to equip each relic they previously could not equip.
 
 ### `-ir 9,26,27,28,82,96,148,156,162,209,211,228`
 **Full flag:** `--item-rewards`
@@ -423,9 +427,13 @@ The pootsleague uses 20 different objectives (A through T), each with specific c
 **Full flag:** `--start-moogle-charms 3`
 **Description:** Start with 3 Moogle Charms (overrides No Moogle Charms challenge).
 
-### `-sws 10`
-**Full flag:** `--start-warp-stones 10`
-**Description:** Start with 10 Warp Stones.
+### `-sws 5`
+**Full flag:** `--start-warp-stones 5`
+**Description:** Start with 5 Warp Stones.
+
+### `-sea 2`
+**Full flag:** `--start-earrings 2`
+**Description:** Start with 2 Earrings.
 
 ### `-sfd 10`
 **Full flag:** `--start-fenix-downs 10`
@@ -506,7 +514,11 @@ The pootsleague includes numerous character sprite and palette customizations. T
 ## Final Flags
 
 ### `-fs`, `-fe`, `-fvd`, `-fr`, `-fj`, `-fbs`, `-fedc`, `-fc`
-**Description:** Various final graphics and sprite settings that complete the visual customization.
+**Description:** Bug fixes: Sketch, Evade, Vanish/Doom, Retort, Jump, Kefka's Tower boss skip, enemy damage counters, and Capture.
+
+### `-fcs`
+**Full flag:** `--fix-chainsaw`
+**Description:** Chain Saw only rolls its 1-in-4 instant-death chance against targets that can be killed by it. Against targets immune to instant death (or to Death status), it always does its normal damage attack instead of sometimes missing. Not part of the pootsleague flagset yet.
 
 ### `-ond`
 **Full flag:** `--original-name-display`

@@ -12,6 +12,8 @@ def parse(parser):
                             help = "Recruited characters start with no equipment")
     characters.add_argument("-eu", "--equipable-umaro", action = "store_true",
                             help = "Umaro can access equipment menu")
+    characters.add_argument("-eue", "--equipable-umaro-espers", action = "store_true",
+                            help = "Umaro can equip espers to gain level up bonuses. Umaro cannot learn spells")
     characters.add_argument("-csrp", "--character-stat-random-percent", default = [100, 100], type = int,
                             nargs = 2, metavar = ("MIN", "MAX"), choices = range(201),
                             help = "Each character stat set to random percent of original within given range ")
@@ -30,6 +32,8 @@ def flags(args):
         flags += " -sn"
     if args.equipable_umaro:
         flags += " -eu"
+    if args.equipable_umaro_espers:
+        flags += " -eue"
     if args.character_stat_random_percent_min != 100 or args.character_stat_random_percent_max != 100:
         flags += f" -csrp {args.character_stat_random_percent_min} {args.character_stat_random_percent_max}"
 
@@ -43,6 +47,7 @@ def options(args):
         ("Start Level", args.start_level, "start_level"),
         ("Start Naked", args.start_naked, "start_naked"),
         ("Equipable Umaro", args.equipable_umaro, "equipable_umaro"),
+        ("Umaro Espers", args.equipable_umaro_espers, "equipable_umaro_espers"),
         ("Character Stats", character_stats, "character_stats"),
     ]
 

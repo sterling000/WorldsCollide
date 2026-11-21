@@ -123,6 +123,9 @@ class Characters():
         if self.args.equipable_umaro:
             characters_asm.equipable_umaro(self.CHARACTER_COUNT)
 
+        if self.args.equipable_umaro_espers:
+            characters_asm.equipable_umaro_espers()
+
         self.mod_init_levels()
 
         if self.args.character_stat_random_percent:

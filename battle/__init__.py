@@ -7,6 +7,7 @@ import battle.auto_status
 import battle.end_checks
 import battle.magitek_upgrade
 import battle.permanent_morph
+import battle.jump_airtime
 from battle.animations import Animations
 
 __all__ = ["Battle"]

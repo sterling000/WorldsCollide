@@ -213,9 +213,15 @@ class Espers():
             value = int(esper.mp * mp_percent)
             esper.mp = max(min(value, 254), 1)
 
-    def equipable_random(self):
+    def equipable_characters_pool(self):
         from data.characters import Characters
         possible_characters = list(range(Characters.CHARACTER_COUNT - 2)) # exclude gogo/umaro
+        if self.args.equipable_umaro_espers:
+            possible_characters.append(Characters.UMARO)
+        return possible_characters
+
+    def equipable_random(self):
+        possible_characters = self.equipable_characters_pool()
 
         for esper in self.espers:
             esper.equipable_characters = 0 # set equipable by no characters
@@ -232,8 +238,7 @@ class Espers():
         #      81 // 12 = 6, each character can equip 6 different espers
         #      81 % 12 = 9, 9 characters can equip 1 additional esper (7 total for those 9)
 
-        from data.characters import Characters
-        possible_characters = list(range(Characters.CHARACTER_COUNT - 2)) # exclude gogo/umaro
+        possible_characters = self.equipable_characters_pool()
         characters_per_esper = self.args.esper_equipable_balanced_random_value
 
         for esper in self.espers:
@@ -241,7 +246,7 @@ class Espers():
             if len(possible_characters) < characters_per_esper:
                 # fewer possibilities left than number of characters needed for each esper
                 character_group = possible_characters # add remaining possible characters to current group
-                possible_characters = list(range(Characters.CHARACTER_COUNT - 2)) # add characters back into pool
+                possible_characters = self.equipable_characters_pool() # add characters back into pool
 
                 # select characters at random from possible pool until
                 # character_group contains characters_per_esper unique characters

@@ -26,6 +26,7 @@ class EbotsRock(Event):
         self.hidon_battle_mod()
 
         self.warp_to_chest_mod()
+        self.coral_amount_mod()
 
         if self.reward.type == RewardType.CHARACTER:
             self.character_mod(self.reward.id)
@@ -35,6 +36,17 @@ class EbotsRock(Event):
             self.item_mod(self.reward.id)
 
         self.log_reward(self.reward)
+
+    def coral_amount_mod(self):
+        # vanilla coral chests give 5, 1, 2, or 3 coral (25% each):
+        #   CB/741A: 50% branch to CB/742A (50% 2 coral at CB/7436, else 1 coral at CB/742E)
+        #   CB/741E: 50% branch to CB/743E (3 coral), else fall through to 5 coral at CB/7422
+        # remove the 1 and 2 coral outcomes so each chest gives 3 or 5 coral (50% each)
+        GIVE_3_CORAL = 0xb743e
+        space = Reserve(0xb741a, 0xb7421, "ebots rock coral chest random amount", field.NOP())
+        space.write(
+            field.BranchRandomly(GIVE_3_CORAL),
+        )
 
     def find_gungho_hurt_mod(self):
         space = Reserve(0xb75d5, 0xb75d5, "ebots rock relm and strago find gungho hurt in thamasa", field.NOP())
