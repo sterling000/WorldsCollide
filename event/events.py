@@ -1,5 +1,6 @@
 from memory.space import Bank, Allocate
 from event.event_reward import CHARACTER_ESPER_ONLY_REWARDS, RewardType, choose_reward, weighted_reward_choice
+from event.free_heals import modify_inn_costs, modify_free_bed_heals, modify_recovery_springs, remove_coliseum_heal, modify_vector_inn
 import instruction.field as field
 
 class Events():
@@ -21,6 +22,14 @@ class Events():
 
     def mod(self):
         # generate list of events from files
+        # each event lives in its own module and is discovered by naming
+        # convention: the class name must equal the module name with
+        # underscores removed, case-insensitive (e.g. mt_kolts.py -> MtKolts).
+        # a file without a matching class contributes no event (helpers like
+        # event_reward.py rely on this, but it also means a typo in a new
+        # event's class name makes it silently skipped). events load in
+        # sorted filename order, so an event's __init__ can only look up
+        # alphabetically-earlier events in name_event
         import os, importlib, inspect
         from event.event import Event
         events = []
@@ -44,6 +53,10 @@ class Events():
             self.character_gating_mod(events, name_event)
         else:
             self.open_world_mod(events)
+
+        # Apply -nfh (no free heals) modifications.
+        if self.args.no_free_heals:
+            self.no_free_heals_mod()
 
         # initialize event bits, mod events, log rewards
         log_strings = []
@@ -126,6 +139,10 @@ class Events():
                     unlocked_slot_iterations.append(slot_iterations[slot])
 
             # pick slot for the next character weighted by number of iterations each slot has been available
+            if not unlocked_slots:
+                raise RuntimeError("character gating deadlock: "
+                                   f"{self.characters.get_available_count()} characters left to assign "
+                                   "but no unfilled character slots are currently unlocked")
             slot_index = weighted_reward_choice(unlocked_slot_iterations, iteration)
             slot = unlocked_slots[slot_index]
             slot.id = self.characters.get_random_available()
@@ -166,9 +183,38 @@ class Events():
         # choose the rest of the rewards, items given to events after all characters/events assigned
         self.choose_item_possible_rewards(reward_slots)
 
+    def no_free_heals_mod(self):
+        """Apply -nfh changes that wrap up free-heal removals/restrictions.
+
+        Modifies inn costs (and converts free inns to paid), turns existing
+        free bed heals into HP-only heals with an ambush chance, randomises
+        recovery spring effects, removes the free full-heal the Coliseum
+        applies to the selected fighter, and reworks Vector's free inn (entry
+        gate plus scaled thief). Per-event heal removals (Doma WoB Leader,
+        Magitek 3 pre-crane, Vector heal hut, Phantom Train restaurant, Narshe
+        school pot, Thamasa inn pricing) are gated locally in their respective
+        event files via ``args.no_free_heals``.
+        """
+        # Modify inn costs (includes converting free inns Returners Hideout
+        # and Figaro Castle into paid inns).
+        modify_inn_costs(self.maps, self.rom, self.dialogs, self.args)
+
+        # Modify existing free bed heals (HP-only heal with 3/8 monster attack chance)
+        modify_free_bed_heals(self.maps, self.dialogs, self.enemies, self.args)
+
+        # Modify recovery springs with random effects
+        modify_recovery_springs(self.maps, self.rom, self.dialogs, self.args)
+
+        # Remove the free full-heal applied to the selected Coliseum fighter
+        remove_coliseum_heal(self.args)
+
+        # Rework Vector's free inn (entry gate + scaled thief)
+        modify_vector_inn(self.dialogs, self.args)
+
     def validate(self, events):
         char_esper_checks = []
         for event in events:
             char_esper_checks += [r for r in event.rewards if r.possible_types == (RewardType.CHARACTER | RewardType.ESPER)]
 
-        assert len(char_esper_checks) == CHARACTER_ESPER_ONLY_REWARDS, f"Number of char/esper only checks changed - Check usages of CHARACTER_ESPER_ONLY_REWARDS and ensure no breaking changes. Expected: {CHARACTER_ESPER_ONLY_REWARDS}, Actual: {len(char_esper_checks)}"
+        if len(char_esper_checks) != CHARACTER_ESPER_ONLY_REWARDS:
+            raise RuntimeError(f"Number of char/esper only checks changed - Check usages of CHARACTER_ESPER_ONLY_REWARDS and ensure no breaking changes. Expected: {CHARACTER_ESPER_ONLY_REWARDS}, Actual: {len(char_esper_checks)}")

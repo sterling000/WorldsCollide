@@ -10,7 +10,7 @@ def parse(parser):
                       help = "Display original character names in party and party select menus")
     misc.add_argument("-rr", "--random-rng", action = "store_true",
                       help = "(DEPRECATED -- Always On) Randomize in-game RNG table. Affects Setzer's Slots, Auction House, Ebot's Rock, ...")
-    misc.add_argument("-rc", "--random-clock", action = "store_true",
+    misc.add_argument("--random-clock", action = "store_true",
                       help = "(DEPRECATED -- Always On) Randomize clock's correct time and NPC clues in Zozo")
     misc.add_argument("-scan", "--scan-all", action = "store_true",
                       help = "All enemies scannable. All characters start with scan learned. Scan costs 0 MP. Useful for testing/debugging")
@@ -20,6 +20,12 @@ def parse(parser):
                       help = "Enable Warp Stones and Warp spell in Fanatics Tower and Ancient Castle")
     misc.add_argument("-npctips", "--npc-dialog-tips", action = "store_true",
                       help = "NPC provide general game tips")
+    misc.add_argument("-nfh", "--no-free-heals", action = "store_true",
+                      help = "Reduce or remove free party heals: inns cost more (and free inns "
+                             "become paid), recovery springs and Phantom Train restaurant get random "
+                             "effects, free beds may trigger ambush, and scripted full heals "
+                             "(Doma WoB Leader, Magitek 3 pre-crane, Vector heal hut, Narshe school "
+                             "pot) are removed or limited.")
 
     from data.movement import ALL
     movement = misc.add_mutually_exclusive_group()
@@ -87,6 +93,9 @@ def flags(args):
     ### NPC tips
     if args.npc_dialog_tips:
         flags += " -npctips"
+
+    if args.no_free_heals:
+        flags += " -nfh"
 
     if args.event_timers_random:
         flags += " -etr"
@@ -161,6 +170,7 @@ def options(args):
         ("Y NPC", y_npc, "y_npc"),
         ("FC/AC Warp", args.enable_warp, "enable_warp"),
         ("NPC Tips", args.npc_dialog_tips, "npc_dialog_tips"),
+        ("No Free Heals", args.no_free_heals, "no_free_heals"),
     ]
 
 def menu(args):

@@ -4,6 +4,8 @@ import battle.load_enemy_level
 import battle.no_exp_party_divide
 import battle.suplex_train_check
 import battle.auto_status
+import battle.keep_battle_mp
+import battle.command_menu_guard
 import battle.end_checks
 import battle.magitek_upgrade
 import battle.permanent_morph

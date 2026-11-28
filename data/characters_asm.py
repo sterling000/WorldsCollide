@@ -8,68 +8,77 @@ def equipable_umaro(character_count):
     space = Reserve(0x39ef4, 0x39ef7, "Reequip Umaro if genji glove/gauntlet/merit award equipped/removed", asm.NOP())
 
 def equipable_umaro_espers():
-    from data.characters import Characters
-
-    # vanilla skills menu only enables the espers option for characters with the magic command and always
-    # grays it out for gogo, which locks umaro out of espers. keep gogo's behavior and always enable it for umaro
+    # the rest of this flag lives where the routines it changes are written:
+    #   menus/skills.py       enables the skills menu espers row for umaro
+    #   battle/keep_battle_mp.py  keeps umaro's mp in battle so mp criticals (illumina, ragnarok, etc.) work
     # NOTE: umaro still cannot learn spells, battle reward code skips characters >= gogo (C2/5E59)
     #       esper level up bonuses (C2/60C2) do not check character id so umaro receives them
-    space = Allocate(Bank.C3, 21, "umaro espers skills menu check", asm.NOP())
-    check_espers_option = space.next_address
-    space.write(
-        asm.LDA(0x0000, asm.ABS_Y),             # a = character id
-        asm.CMP(Characters.GOGO, asm.IMM8),
-        asm.BNE("CHECK_UMARO"),
-        asm.LDA(0x24, asm.IMM8),                # gray out espers option
-        asm.STA(0x79, asm.DIR),
-        asm.RTS(),
+    pass
 
-        "CHECK_UMARO",
-        asm.CMP(Characters.UMARO, asm.IMM8),
-        asm.BNE("RETURN"),
-        asm.LDA(0x20, asm.IMM8),                # enable espers option
-        asm.STA(0x79, asm.DIR),
+def set_battle_experience_cap(experience):
+    # C2/6235 clamps a character's experience after battle to this 24-bit value
+    # (vanilla 15,000,000); -lc LEVEL lowers it to the total for LEVEL
+    from data import level_cap
+    space = Reserve(level_cap.BATTLE_EXP_CAP_START, level_cap.BATTLE_EXP_CAP_END, "battle experience cap")
+    space.write(experience.to_bytes(3, 'little'))
 
-        "RETURN",
-        asm.RTS(),
-    )
-
-    space = Reserve(0x34d6c, 0x34d77, "skills menu gray out espers option for gogo", asm.NOP())
-    space.write(
-        asm.JMP(check_espers_option, asm.ABS),
-    )
-
-    # battle init zeroes current/max mp for characters without an mp using command (magic/x-magic/lore)
-    # umaro has no commands so he always fought with 0 mp, which prevents mp criticals (illumina, ragnarok, etc.)
-    # exempt umaro so he keeps his mp in battle (a = 8-bit, x = 8-bit, stack: $01 = p, $02 = character index)
-    # NOTE: lives in F0 because C2 free space is exhausted with the full pootsleague flagset
-    #       returns carry set to keep mp, otherwise carry clear and a = character index
-    src = [
-        asm.LSR(0xf8, asm.DIR),                 # carry = character has mp using command
-        asm.BCS("RETURN"),
-        asm.LDA(0x05, asm.S),                   # a = character index (+3 for long return address)
-        asm.TAX(),
-        asm.LDA(0x3ed8, asm.ABS_X),             # a = character id
-        asm.CMP(Characters.UMARO, asm.IMM8),
-        asm.BEQ("RETURN"),                      # equal, carry set
-        asm.TXA(),                              # a = character index (vanilla tax follows)
-        asm.CLC(),
-        "RETURN",
-        asm.RTL(),
-    ]
-    space = Write(Bank.F0, src, "umaro keep mp in battle")
-    check_keep_mp = space.start_address_snes
-
-    space = Reserve(0x253f9, 0x253fe, "battle zero mp if no mp using command", asm.NOP())
-    space.add_label("KEEP_MP", 0x25408)
-    space.write(
-        asm.JSL(check_keep_mp),
-        asm.BCS("KEEP_MP"),
-    )
+def set_menu_level_cap(level):
+    # status menu: show 0 experience to next level at or above `level`, the
+    # same path vanilla takes at level 99 (C3/60A6 CMP #$63; BEQ -> CMP #level; BCS)
+    from data import level_cap
+    space = Reserve(level_cap.MENU_MAX_LEVEL_START, level_cap.MENU_MAX_LEVEL_END,
+                    "status menu: no experience needed at the level cap")
+    space.write([level, level_cap.BCS])
 
 def set_starting_level(start_level):
     space = Reserve(0x09fc6, 0x09fc6, "Starting level")
     space.write(start_level.to_bytes(1, 'little'))
+
+def set_random_starting_levels(levels, default_level):
+    """Give each character slot its own starting level.
+
+    C0/9F78 returns the average level of the available characters, or the
+    starting-level constant (C0/9FC5 LDA #$03, which -stl patches) when no
+    character is available yet. Every character is initialized that way at
+    game start (event/start.py sets properties for all 14 before anyone is
+    recruited), so replacing that constant with a lookup by character slot
+    ($eb) gives each character its own level. Once anyone is available the
+    routine averages exactly as before.
+
+    levels: one level per playable character (slots 0-13); the remaining
+    slots (guests) and any out-of-range slot use default_level."""
+    SLOT_COUNT = 16
+    table = list(levels) + [default_level] * (SLOT_COUNT - len(levels))
+
+    space = Allocate(Bank.C0, len(table), "random starting levels by character slot")
+    space.write(bytes(table))
+    table_address = space.start_address_snes
+
+    src = [
+        asm.TDC(),                              # a = 0 (clears high byte for tax)
+        asm.LDA(0xeb, asm.DIR),                 # a = character slot
+        asm.CMP(SLOT_COUNT, asm.IMM8),
+        asm.BGE("DEFAULT"),
+        asm.TAX(),                              # x = character slot (16 bit index)
+        asm.LDA(table_address, asm.LNG_X),      # a = this character's starting level
+        asm.RTS(),
+
+        "DEFAULT",
+        asm.LDA(default_level, asm.IMM8),
+        asm.RTS(),
+    ]
+    space = Write(Bank.C0, src, "random starting level lookup")
+    lookup = space.start_address
+
+    # C0/9FC3: BRA $9FC7 (clamp the average to 99) / C0/9FC5: LDA #$03 (no one available).
+    # An average of levels is never above 99, so return it directly, and send the
+    # no-one-available case to the lookup (its levels are already 3-99).
+    space = Reserve(0x09fc3, 0x09fc7, "starting level: return average or per-character level")
+    space.write(
+        asm.RTS(),
+        asm.NOP(),
+        asm.JMP(lookup, asm.ABS),
+    )
 
 def update_morph_character(characters):
     from constants.commands import id_name

@@ -32,7 +32,13 @@ class MultipleCalls(_Instruction):
         return super().__str__(hex(self.address))
 
 class SelectParties(_Instruction):
-    def __init__(self, count, unmovable_characters = 0x0000):
+    def __init__(self, count, unmovable_characters=None):
+        # required characters (-rc/--require-characters) must not be moved out of the party they
+        # have been placed in.  the bitmask (bit n = character n) is read at instruction-build time
+        # (after arguments are parsed/resolved) so it does not depend on module import order.
+        if unmovable_characters is None:
+            import args
+            unmovable_characters = getattr(args, "required_character_unmovable", 0x0000)
         super().__init__(0x99, count, unmovable_characters.to_bytes(2, "little"))
 
     def __str__(self):
@@ -546,6 +552,14 @@ class FadeOutSong(_Instruction):
     def __str__(self):
         return super().__str__(self.args[0])
 
+class FadeInPreviousSong(_Instruction):
+    # Fade in the previously faded out song (opcode 0xF3)
+    def __init__(self, fade_time):
+        super().__init__(0xf3, fade_time)
+
+    def __str__(self):
+        return super().__str__(self.args[0])
+
 class PlaySoundEffect(_Instruction):
     def __init__(self, sound_effect_id):
         self.sound_effect_id = sound_effect_id
@@ -626,7 +640,8 @@ class SetMapTiles(_Instruction):
 class SetEventBit(_Instruction):
     def __init__(self, event_bit):
         self.event_bit = event_bit
-        assert self.event_bit <= 0x6ff
+        if not 0 <= self.event_bit <= 0x6ff:
+            raise ValueError(f"SetEventBit: invalid event bit {hex(self.event_bit)}, must be within 0x000-0x6ff")
 
         opcode = 0xd0 + (self.event_bit // 0x100) * 2
         arg = self.event_bit & 0xff
@@ -638,7 +653,8 @@ class SetEventBit(_Instruction):
 class ClearEventBit(_Instruction):
     def __init__(self, event_bit):
         self.event_bit = event_bit
-        assert self.event_bit <= 0x6ff
+        if not 0 <= self.event_bit <= 0x6ff:
+            raise ValueError(f"ClearEventBit: invalid event bit {hex(self.event_bit)}, must be within 0x000-0x6ff")
 
         opcode = 0xd1 + (self.event_bit // 0x100) * 2
         arg = self.event_bit & 0xff

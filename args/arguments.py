@@ -1,3 +1,14 @@
+import argparse
+
+class HelpFormatter(argparse.HelpFormatter):
+    # an option that takes one or two values (nargs "+" plus max_values = 2 on the
+    # action, with the group's process() rejecting more) shows as "FIRST [SECOND]"
+    # rather than argparse's "FIRST [SECOND ...]"
+    def _format_args(self, action, default_metavar):
+        if getattr(action, "max_values", None) == 2 and isinstance(action.metavar, tuple):
+            return "%s [%s]" % action.metavar
+        return super()._format_args(action, default_metavar)
+
 class Arguments:
     def __init__(self):
         import importlib
@@ -16,7 +27,7 @@ class Arguments:
             self.group_modules[group] = importlib.import_module("args." + group)
 
         from argparse import ArgumentParser
-        self.parser = ArgumentParser()
+        self.parser = ArgumentParser(formatter_class = HelpFormatter)
 
         self.parser.add_argument("-i", dest = "input_file", required = True, help = "FFIII US v1.0 rom file")
         self.parser.add_argument("-o", dest = "output_file", required = False, help = "Modified FFIII US v1.0 rom file")
@@ -62,6 +73,19 @@ class Arguments:
 
         # if self.debug:
         self.spoiler_log = True
+
+        # Update the global args module attributes to match this Arguments instance,
+        # which is helpful if a wrapper script instantiates Arguments dynamically
+        # instead of importing the args module directly.
+        import sys
+        if "args" in sys.modules:
+            module = sys.modules["args"]
+            for name, value in self.__dict__.items():
+                setattr(module, name, value)
+
+        # Resolve required characters (-rc) now that the rng is seeded: this may choose random
+        # required characters and finalizes the starting party and the party-select unmovable mask
+        self.group_modules["starting_party"].resolve_required_characters(self)
 
     def _process_min_max(self, arg_name):
         values = getattr(self, arg_name)

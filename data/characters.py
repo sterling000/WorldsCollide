@@ -31,6 +31,9 @@ class Characters():
     def __init__(self, rom, args, spells):
         self.rom = rom
         self.args = args
+        self.start_levels = None    # per-character levels when -stlr is used
+        self.exp_tables = None      # (default, capped) experience tables when -lc is used
+        self.exp_cap = None         # battle experience cap when -lc is used
 
         self.init_data = DataArray(self.rom, self.INIT_DATA_START, self.INIT_DATA_END, self.INIT_DATA_SIZE)
         self.name_data = DataArray(self.rom, self.NAMES_START, self.NAMES_END, self.NAME_SIZE)
@@ -86,7 +89,62 @@ class Characters():
         for character in self.characters:
             character.init_level_factor = 0
 
-        characters_asm.set_starting_level(self.args.start_level)
+        if self.args.start_level_random:
+            import random
+            self.start_levels = [random.randint(self.args.start_level_random_min,
+                                                self.args.start_level_random_max)
+                                 for _ in range(self.CHARACTER_COUNT)]
+            characters_asm.set_random_starting_levels(self.start_levels, self.args.start_level)
+        else:
+            characters_asm.set_starting_level(self.args.start_level)
+
+    def mod_level_cap(self):
+        from data import level_cap
+        default = [self.rom.get_short(level_cap.EXP_TABLE_START + 2 * index)
+                   for index in range(level_cap.EXP_TABLE_COUNT)]
+        if self.args.level_cap_hard is not None:
+            # hard cap: vanilla table, battle experience capped at the total for the level
+            capped = default
+            self.exp_cap = level_cap.hard_cap_experience(default, self.args.level_cap_hard)
+            characters_asm.set_battle_experience_cap(self.exp_cap)
+            characters_asm.set_menu_level_cap(self.args.level_cap_hard)
+        else:
+            # soft cap: steeper table, vanilla battle cap
+            capped = level_cap.capped_table(default, self.args.level_cap_mean, self.args.level_cap_width)
+            for index, value in enumerate(capped):
+                self.rom.set_short(level_cap.EXP_TABLE_START + 2 * index, value)
+            self.exp_cap = level_cap.BATTLE_EXP_CAP
+            # once experience stops at the battle cap no level can be gained: show
+            # 0 experience to next level from the last reachable level on, as at 99
+            highest = level_cap.highest_level(capped, self.exp_cap)
+            if highest < 99:
+                characters_asm.set_menu_level_cap(highest)
+        self.exp_tables = (default, capped)
+
+    def log_level_cap(self):
+        from log import section, format_option
+        from data import level_cap
+        default, capped = self.exp_tables
+        default_totals, capped_totals = level_cap.totals(default), level_cap.totals(capped)
+
+        # every 5th level up to the last one battle can reach (experience stops at the cap)
+        reachable = level_cap.highest_level(capped, self.exp_cap)
+        entries = [format_option(f"Level {level}", f"{capped_totals[level - 1]:,} ({default_totals[level - 1]:,})")
+                   for level in range(5, reachable + 1, 5)]
+        if reachable % 5:
+            entries.append(format_option(f"Level {reachable}",
+                                         f"{capped_totals[reachable - 1]:,} ({default_totals[reachable - 1]:,})"))
+        entries.append(format_option("Highest Level", reachable))
+        entries.append(format_option("Experience Cap", f"{self.exp_cap:,}"))
+        half = (len(entries) + 1) // 2
+        section("Level Cap: Total Exp (Default)", entries[:half], entries[half:])
+
+    def log_start_levels(self):
+        from log import section, format_option
+        entries = [format_option(self.DEFAULT_NAME[character].capitalize(), level)
+                   for character, level in enumerate(self.start_levels)]
+        half = (len(entries) + 1) // 2
+        section("Starting Levels", entries[:half], entries[half:])
 
     def stats_random_percent(self):
         import random
@@ -128,6 +186,9 @@ class Characters():
 
         self.mod_init_levels()
 
+        if self.args.level_cap_hard is not None or self.args.level_cap_mean is not None:
+            self.mod_level_cap()
+
         if self.args.character_stat_random_percent:
             self.stats_random_percent()
 
@@ -135,6 +196,10 @@ class Characters():
 
         if self.args.character_names:
             self.mod_names()
+
+        if self.args.steveify:
+            for character in self.characters:
+                character.name = self.args.steveify
 
         if self.args.original_name_display:
             characters_asm.show_original_names()
@@ -147,6 +212,10 @@ class Characters():
     def write(self):
         if self.args.spoiler_log:
             self.commands.log()
+            if self.start_levels:
+                self.log_start_levels()
+            if self.exp_tables:
+                self.log_level_cap()
 
         for character_index in range(len(self.characters)):
             self.init_data[character_index] = self.characters[character_index].init_data()

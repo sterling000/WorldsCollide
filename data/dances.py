@@ -213,6 +213,10 @@ class Dances:
             dance.dances = abilities
 
     def mod(self):
+        if self.args.steveify:
+            for dance in self.dances:
+                dance.name = self.args.steveify
+
         self.write_learners_table()
         self.write_is_learner()
         self.after_battle_check_mod()
